@@ -4,7 +4,7 @@ import numpy as np
 class Strategy:
     def __init__(self, initial_cash, initial_nav, start_date, end_date, asset):
         """Initialisation de la stratégie de gestion de portefeuille"""
-        self.initial_cash = initial_cash
+        self.initial_cash = initial_cash 
         self.initial_nav = initial_nav
         self.start_date = pd.to_datetime(start_date)
         self.end_date = pd.to_datetime(end_date)
@@ -32,7 +32,7 @@ class Strategy:
         self._run_backtest()
 
     def _get_next_available_date(self, date):
-        """Trouve la prochaine date disponible"""
+        """Cette fonction se charge de trouver la prochaine date disponible"""
         available_dates = self.available_dates[self.available_dates >= date]
         return available_dates[0] if not available_dates.empty else None
 
@@ -42,7 +42,7 @@ class Strategy:
         portfolio_state = pd.DataFrame(columns=['Quantity', 'Price', 'Value', 'Weight'])
         total_value = self.initial_cash
 
-        # Ajout ORAC et SNTS (20% chacun)
+        # Ajout de ORAC et SNTS (20% chacun)
         for fixed_asset in ['ORAC', 'SNTS']:
             value = total_value * 0.20
             quantity = value / prices[fixed_asset]
@@ -55,7 +55,7 @@ class Strategy:
         
         # Ajout top 18 (3.33% chacun)
         top_performers = self.asset.get_top_performers(self.start_date)
-        individual_weight = 0.0333
+        individual_weight = (60/18)*0.01
 
         for asset in top_performers.index:
             value = total_value * individual_weight
@@ -119,7 +119,7 @@ class Strategy:
                 
                 transactions.append({
                     'Asset': fixed_asset,
-                    'Type': 'Adjustment',
+                    'Type': 'Ajustement',
                     'Quantity': new_quantity - old_quantity,
                     'Price': current_prices[fixed_asset],
                     'Value': (new_quantity - old_quantity) * current_prices[fixed_asset]
@@ -135,36 +135,38 @@ class Strategy:
             # 4.2 Autres titres à 3.33%
             other_assets = [asset for asset in prev_state.index if asset not in ['ORAC', 'SNTS']]
             for asset in other_assets:
-                target_value = total_value * 0.0333
+                target_value = total_value * (60/18)*0.01
                 new_quantity = target_value / current_prices[asset]
                 old_quantity = prev_state.loc[asset, 'Quantity']
                 
                 transactions.append({
                     'Asset': asset,
-                    'Type': 'Adjustment',
+                    'Type': 'Ajustement',
                     'Quantity': new_quantity - old_quantity,
                     'Price': current_prices[asset],
-                    'Value': (new_quantity - old_quantity) * current_prices[asset]
+                    'Value': target_value
                 })
                 
                 prev_state.loc[asset] = [
                     new_quantity,
                     current_prices[asset],
                     target_value,
-                    0.0333
+                    (60/18)*0.01
                 ]
             
             # 4.3 Recalcul des valorisations après rééquilibrage
-            total_value = prev_state['Value'].sum()
-        
-        # 5. Gestion du top 18 si pas de rééquilibrage
-        else:
-            top_performers = self.asset.get_top_performers(current_date)
-            current_assets = [asset for asset in prev_state.index if asset not in ['ORAC', 'SNTS']]
-            available_top = [asset for asset in top_performers.index if asset not in prev_state.index]
+            #total_value = prev_state['Value'].sum()
             
-            for current_asset in current_assets:
-                if current_asset not in top_performers.index:
+       ####  Correctionn à apporter     
+        # 5. Gestion du top 18 si pas de rééquilibrage
+        
+        
+        top_performers = self.asset.get_top_performers(current_date)
+        current_assets = [asset for asset in prev_state.index if asset not in ['ORAC', 'SNTS']]
+        available_top = [asset for asset in top_performers.index if asset not in prev_state.index]
+            
+        for current_asset in current_assets:
+            if current_asset not in top_performers.index:
                     # Conservation du poids pour le nouveau titre
                     old_weight = prev_state.loc[current_asset, 'Weight']
                     old_value = prev_state.loc[current_asset, 'Value']
@@ -202,7 +204,7 @@ class Strategy:
         # 6. Vérification finale des pondérations
         #weights_sum = prev_state['Weight'].sum()
         #if not np.isclose(weights_sum, 1.0, rtol=1e-5):
-         #   print(f"ATTENTION: La somme des pondérations à {current_date} est de {weights_sum:.4f}")
+         #   print(f"ATTENTION: La somme des p£ondérations à {current_date} est de {weights_sum:.4f}")
         
         # 7. Mise à jour des données du portefeuille
         self.portfolio['Date'].append(current_date)

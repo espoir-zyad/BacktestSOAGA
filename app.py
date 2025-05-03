@@ -178,7 +178,7 @@ with st.sidebar:
         
         strategy_type = st.selectbox(
             "Stratégie",
-            ["Stratégie de Base"]
+            ["Top performeur"]
         )
         
         initial_nav = st.number_input(
@@ -234,11 +234,11 @@ else:
         history = strategy.display_portfolio_history()
         
         # Création des onglets
-        tab1, tab2 = st.tabs(["Résultats du Backtest", "Recherche par Date"])
+        #tab1, tab2 = st.tabs(["Résultats du Backtest", "Recherche par Date"])
         
-        with tab1:
+        #with tab1:
             # Premier et dernier jour
-            for day, title in [(history.iloc[0], "Premier Jour"), (history.iloc[-1], "Dernier Jour")]:
+        for day, title in [(history.iloc[0], "Premier Jour"), (history.iloc[-1], "Dernier Jour")]:
                 st.markdown(f"""
                     <div class='section-container'>
                         <h3 style='color: maroon; text-align: center;'>{title}</h3>
@@ -279,21 +279,21 @@ else:
                 #st.markdown("</div>", unsafe_allow_html=True)
             
             # Graphique de performance
-            st.markdown("""
+        st.markdown("""
                 <div class='section-container'>
                     <h3 style='color: maroon; text-align: center;'>Performance Comparée</h3>
             """, unsafe_allow_html=True)
                         # Calcul des données pour le graphique
-            nav_series = strategy.get_nav_series()
-            nav_rebased = 100 * nav_series / nav_series.iloc[0]
+        nav_series = strategy.get_nav_series()
+        nav_rebased = 100 * nav_series / nav_series.iloc[0]
             
-            benchmark_data = asset.data.loc[strategy.start_date:strategy.end_date, 'BRVM C']
-            benchmark_rebased = 100 * benchmark_data / benchmark_data.iloc[0]
+        benchmark_data = asset.data.loc[strategy.start_date:strategy.end_date, 'BRVM C']
+        benchmark_rebased = 100 * benchmark_data / benchmark_data.iloc[0]
             
             # Configuration du graphique
-            fig = make_subplots(rows=1, cols=1)
+        fig = make_subplots(rows=1, cols=1)
             
-            fig.add_trace(
+        fig.add_trace(
                 go.Scatter(
                     x=nav_rebased.index,
                     y=nav_rebased.values,
@@ -303,7 +303,7 @@ else:
                 )
             )
             
-            fig.add_trace(
+        fig.add_trace(
                 go.Scatter(
                     x=benchmark_rebased.index,
                     y=benchmark_rebased.values,
@@ -313,7 +313,7 @@ else:
                 )
             )
             
-            fig.update_layout(
+        fig.update_layout(
                 title={
                     'text': 'Performance Comparée (Base 100)',
                     'y':0.95,
@@ -336,7 +336,7 @@ else:
                 )
             )
             
-            fig.add_hline(
+        fig.add_hline(
                 y=100,
                 line_dash="dot",
                 line_color="gray",
@@ -344,85 +344,85 @@ else:
                 annotation_position="bottom right"
             )
             
-            st.plotly_chart(fig, use_container_width=True)
-            st.markdown("</div>", unsafe_allow_html=True)
+        st.plotly_chart(fig, use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
             
             # Calcul des indicateurs de performance et de risque
             #nav_weekly = nav_series.resample('W').last()
             #benchmark_weekly = benchmark_data.resample('W').last()
             
-            nav_weekly = nav_series.resample('W').last()
-            benchmark_weekly = benchmark_data.resample('W').last()
+        nav_weekly = nav_series.resample('W').last()
+        benchmark_weekly = benchmark_data.resample('W').last()
             
-        
             
             #Performance journalière
-            nav_daily = nav_series.pct_change().dropna()
-            benchmark_return1 = ((benchmark_data.iloc[-1] - 100) / 100) * 100
+            #nav_daily = nav_series.pct_change().dropna()
+            #benchmark_return1 = ((benchmark_data.iloc[-1] - 100) / 100) * 100
             
-            
-            portfolio_returns = nav_weekly.pct_change().dropna()
-            benchmark_returns = benchmark_weekly.pct_change().dropna()
+        portfolio_returns = nav_weekly.pct_change().dropna()
+        benchmark_returns_weekly = benchmark_weekly.pct_change().dropna()
             
             # Indicateurs de performance
-            initial_nav = nav_series.iloc[0]
-            final_nav = nav_series.iloc[-1]
-            total_return = ((final_nav - initial_nav) / initial_nav) * 100
+        initial_nav = nav_series.iloc[0]
+        final_nav = nav_series.iloc[-1]
+        total_return = ((final_nav - initial_nav) / initial_nav) * 100
             
-            benchmark_return = ((benchmark_rebased.iloc[-1] - 100) / 100) * 100
-            surperf = total_return - benchmark_return
+        benchmark_return = ((benchmark_rebased.iloc[-1] - 100) / 100) * 100
+        surperf = total_return - benchmark_return
             
             # Indicateurs de risque
-            volatility_portfolio = portfolio_returns.std() * np.sqrt(52) * 100
-            volatility_benchmark = benchmark_returns.std() * np.sqrt(52) * 100
-            correlation = portfolio_returns.corr(benchmark_returns)
-            beta = portfolio_returns.cov(benchmark_returns) / benchmark_returns.var()
+        volatility_portfolio = portfolio_returns.std() * np.sqrt(52) * 100
+        volatility_benchmark = benchmark_returns_weekly.std() * np.sqrt(52) * 100
+        correlation = portfolio_returns.corr(benchmark_returns_weekly)
+        beta = portfolio_returns.cov(benchmark_returns_weekly) / benchmark_returns_weekly.var()
             
             # Ratio de Sharpe (taux sans risque de 6%)
-            risk_free_rate = 0.06
-            excess_return = portfolio_returns.mean() * 52 - risk_free_rate
-            sharpe_ratio = excess_return / (portfolio_returns.std() * np.sqrt(52))
+        risk_free_rate = 0.06
+        #risk_free_weekly = risk_free_rate/52
+        risk_free_weekly = (1 + risk_free_rate) ** (1/52) - 1  # Conversion en taux hebdomadaire
+        excess_return = portfolio_returns.mean() - risk_free_weekly
+        sharpe_ratio = (excess_return / portfolio_returns.std())*np.sqrt(52)
             
                         # Affichage des métriques de performance
-            st.markdown("""
+        st.markdown("""
                 <div class='section-container'>
                     <h3 style='color: maroon; text-align: center;'>Résumé des Performances</h3>
             """, unsafe_allow_html=True)
 
-            col1, col2, col3 = st.columns(3)
-            with col1:
+        col1, col2, col3 = st.columns(3)
+        with col1:
                 st.metric(
                     "Performance Portefeuille",
                     f"{total_return:.2f}%",
                     delta=f"{total_return:.2f}%",
                     delta_color="normal" if total_return > 0 else "inverse"
                 )
-            with col2:
+        with col2:
                 st.metric(
                     "Performance BRVM-C",
                     f"{benchmark_return:.2f}%",
                     delta=f"{benchmark_return:.2f}%",
                     delta_color="normal" if benchmark_return > 0 else "inverse"
                 )
-            with col3:
+        with col3:
                 st.metric(
                     "Surperformance",
                     f"{surperf:.2f}%",
                     delta=f"{surperf:.2f}%",
                     delta_color="normal" if surperf > 0 else "inverse"
                 )
-            st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
             # Affichage des indicateurs de risque
-            st.markdown("""
+        st.markdown("""
                 <div class='section-container'>
                     <h3 style='color: maroon; text-align: center;'>Indicateurs de Risque</h3>
                     <div style='display: flex; justify-content: space-around; flex-wrap: wrap;'>
             """, unsafe_allow_html=True)
 
             # Volatilité
-            risk_col1, risk_col2 = st.columns(2)
-            with risk_col1:
+        risk_col1, risk_col2 = st.columns(2)
+        with risk_col1:
                 st.markdown("""
                     <div class='metric-container'>
                         <h4 style='color: maroon; margin-bottom: 15px;'>Volatilité (annualisée)</h4>
@@ -439,7 +439,7 @@ else:
                     </div>
                 """.format(volatility_portfolio, volatility_benchmark), unsafe_allow_html=True)
 
-            with risk_col2:
+        with risk_col2:
                 st.markdown("""
                     <div class='metric-container'>
                         <h4 style='color: maroon; margin-bottom: 15px;'>Mesures de Risque</h4>
@@ -457,7 +457,7 @@ else:
                 """.format(correlation, beta), unsafe_allow_html=True)
 
             # Ratio de Sharpe
-            st.markdown("""
+        st.markdown("""
                 <div class='metric-container' style='margin-top: 20px;'>
                     <h4 style='color: maroon; margin-bottom: 15px; text-align: center;'>Ratio de Sharpe</h4>
                     <p style='text-align: center; font-size: 24px; font-weight: bold; color: {};'>{:.2f}</p>
@@ -465,19 +465,18 @@ else:
                 </div>
             """.format('green' if sharpe_ratio > 0 else 'red', sharpe_ratio), unsafe_allow_html=True)
 
-            st.markdown("</div></div>", unsafe_allow_html=True)
+        st.markdown("</div></div>", unsafe_allow_html=True)
             
-            # Après st.markdown("</div></div>", unsafe_allow_html=True)
             
             # Export des données
-            st.markdown("""
+        st.markdown("""
                 <div class='section-container'>
                     <h3 style='color: maroon; text-align: center;'>Export des Données</h3>
                 </div>
             """, unsafe_allow_html=True)
 
             # Préparation des données pour l'export
-            def prepare_export_data(history):
+        def prepare_export_data(history):
                 # Création d'un writer Excel
                 output = io.BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
@@ -526,8 +525,8 @@ else:
                 return output.getvalue()
 
             # Bouton de téléchargement
-            export_data = prepare_export_data(history)
-            st.download_button(
+        export_data = prepare_export_data(history)
+        st.download_button(
                 label="📥 Télécharger les données",
                 data=export_data,
                 file_name=f"backtest_data_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.xlsx",
@@ -535,87 +534,87 @@ else:
             )
         # Dans l'onglet recherche (remplacer le code existant de tab2)
         # Remplacer la section du tab2 par :
-        with tab2:
-            if 'history' not in st.session_state:
-                st.session_state.history = history
+        #with tab2:
+        #     if 'history' not in st.session_state:
+        #         st.session_state.history = history
 
-            st.markdown("""
-                 <div class='section-container'>
-                     <h3 style='color: maroon; text-align: center;'>Recherche par Date</h3>
-                </div>
-            """, unsafe_allow_html=True)
+        #     st.markdown("""
+        #          <div class='section-container'>
+        #              <h3 style='color: maroon; text-align: center;'>Recherche par Date</h3>
+        #         </div>
+        #     """, unsafe_allow_html=True)
 
-            # Recherche par date
-            search_col1, search_col2 = st.columns([3, 1])
-            with search_col1:
-                search_date = st.date_input(
-                    "Sélectionnez une date",
-                    min_value=pd.Timestamp(start_date).date(),
-                    max_value=pd.Timestamp(end_date).date()
-                )
+        #     # Recherche par date
+        #     search_col1, search_col2 = st.columns([3, 1])
+        #     with search_col1:
+        #         search_date = st.date_input(
+        #             "Sélectionnez une date",
+        #             min_value=pd.Timestamp(start_date).date(),
+        #             max_value=pd.Timestamp(end_date).date()
+        #         )
             
-            with search_col2:
-                search_button = st.button(
-                   "Rechercher", 
-                    type="primary",
-                    key="search_button"  # Ajout d'une clé unique
-           )
+        #     with search_col2:
+        #         search_button = st.button(
+        #            "Rechercher",
+        #             type="primary",
+        #             key="search_button"  # Ajout d'une clé unique
+        #    )
 
 
-            if search_button:
+        #     if search_button:
                 
-                st.session_state.search_active = True
-                st.session_state.search_date = search_date
+        #         st.session_state.search_active = True
+        #         st.session_state.search_date = search_date
                 
-                search_date = pd.Timestamp(search_date)
-                closest_date = min(pd.to_datetime(history['Date']), key=lambda x: abs(x - search_date))
-                day_data = history[history['Date'] == closest_date]
+        #         search_date = pd.Timestamp(search_date)
+        #         closest_date = min(pd.to_datetime(history['Date']), key=lambda x: abs(x - search_date))
+        #         day_data = history[history['Date'] == closest_date]
 
-                if not day_data.empty:
-                    day = day_data.iloc[0]
+        #         if not day_data.empty:
+        #             day = day_data.iloc[0]
                     
-                    # Affichage des résultats dans un conteneur stylisé
-                    st.markdown("""
-                        <div class='search-section'>
-                            <h4 style='color: maroon; margin-bottom: 20px;'>Résultats de la recherche</h4>
-                        </div>
-                    """, unsafe_allow_html=True)
+        #             # Affichage des résultats dans un conteneur stylisé
+        #             st.markdown("""
+        #                 <div class='search-section'>
+        #                     <h4 style='color: maroon; margin-bottom: 20px;'>Résultats de la recherche</h4>
+        #                 </div>
+        #             """, unsafe_allow_html=True)
                     
-                    # Informations principales
-                    col1, col2, col3 = st.columns(3)
-                    with col1:
-                        st.metric("Date", day['Date'].strftime('%d/%m/%Y'))
-                    with col2:
-                        st.metric("Valeur Liquidative", f"{day['NAV']:,.2f}")
-                    with col3:
-                        st.metric("Valorisation", f"{day['Total_Value']:,.2f} XOF")
+        #             # Informations principales
+        #             col1, col2, col3 = st.columns(3)
+        #             with col1:
+        #                 st.metric("Date", day['Date'].strftime('%d/%m/%Y'))
+        #             with col2:
+        #                 st.metric("Valeur Liquidative", f"{day['NAV']:,.2f}")
+        #             with col3:
+        #                 st.metric("Valorisation", f"{day['Total_Value']:,.2f} XOF")
 
-                    # État du portefeuille
-                    st.markdown("#### État du Portefeuille")
-                    state_df = pd.DataFrame.from_dict(day['State'])
-                    st.dataframe(
-                        state_df.style.format({
-                            'Quantity': '{:,.2f}',
-                            'Price': '{:,.2f}',
-                            'Value': '{:,.2f}',
-                            'Weight': '{:.2%}'
-                        }),
-                        hide_index=False
-                    )
+        #             # État du portefeuille
+        #             st.markdown("#### État du Portefeuille")
+        #             state_df = pd.DataFrame.from_dict(day['State'])
+        #             st.dataframe(
+        #                 state_df.style.format({
+        #                     'Quantity': '{:,.2f}',
+        #                     'Price': '{:,.2f}',
+        #                     'Value': '{:,.2f}',
+        #                     'Weight': '{:.2%}'
+        #                 }),
+        #                 hide_index=False
+        #             )
 
-                    # Transactions du jour
-                    if isinstance(day['Transactions'], pd.DataFrame) and not day['Transactions'].empty:
-                        st.markdown("#### Transactions du Jour")
-                        st.dataframe(
-                            day['Transactions'].style.format({
-                                'Quantity': '{:,.2f}',
-                                'Price': '{:,.2f}',
-                                'Value': '{:,.2f}'
-                            }),
-                            hide_index=True
-                        )
-                else:
-                    st.warning(f"Aucune donnée disponible pour le {search_date.strftime('%d/%m/%Y')}")
+        #             # Transactions du jour
+        #             if isinstance(day['Transactions'], pd.DataFrame) and not day['Transactions'].empty:
+        #                 st.markdown("#### Transactions du Jour")
+        #                 st.dataframe(
+        #                     day['Transactions'].style.format({
+        #                         'Quantity': '{:,.2f}',
+        #                         'Price': '{:,.2f}',
+        #                         'Value': '{:,.2f}'
+        #                     }),
+        #                     hide_index=True
+        #                 )
+        #         else:
+        #             st.warning(f"Aucune donnée disponible pour le {search_date.strftime('%d/%m/%Y')}")
     
     except Exception as e:
         st.error(f"Une erreur s'est produite: {str(e)}")
