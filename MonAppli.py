@@ -164,7 +164,7 @@ with st.sidebar:
 if not submit_button:
     
         st.markdown("""
-        ### Description de la stratégie V2
+        ### Description de la stratégie à rendement et à faible volatilité
         - Maintenir ORAC et SNTS à 18% chacun (36%)
         - Maintenir SGBC et ECOC à 5% chacun (10%)
         - Sélectionner les 16 meilleures actions à dividendes (54%)
@@ -174,7 +174,7 @@ if not submit_button:
         
    
         
-        ### Description de la stratégie V3
+        ### Description de la stratégie Interne T1 2023
         1. **Titres à poids fixes** (49% du portefeuille)
            - STNS et ORAC : 15% chacun
            - SGBC et ECOC : 5% chacun
@@ -245,16 +245,16 @@ else:
                 })
             )
             
-            if isinstance(day['Transactions'], pd.DataFrame) and not day['Transactions'].empty:
-                st.markdown("#### Transactions")
-                st.dataframe(
-                    day['Transactions'].style.format({
-                        'Quantity': '{:,.2f}',
-                        'Price': '{:,.2f}',
-                        'Value': '{:,.2f}'
-                    })
-                )
-            st.markdown("</div>", unsafe_allow_html=True)
+            # if isinstance(day['Transactions'], pd.DataFrame) and not day['Transactions'].empty:
+            #     st.markdown("#### Transactions")
+            #     st.dataframe(
+            #         day['Transactions'].style.format({
+            #             'Quantity': '{:,.2f}',
+            #             'Price': '{:,.2f}',
+            #             'Value': '{:,.2f}'
+            #         })
+            #     )
+            # st.markdown("</div>", unsafe_allow_html=True)
         
         # Graphiques de composition
         st.markdown("""

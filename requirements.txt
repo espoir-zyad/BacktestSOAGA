@@ -1,0 +1,12 @@
+pandas
+numpy
+collections
+datetime
+streamlit
+plotly.graph_objects
+plotly.subplots
+base64
+io
+plotly.express
+
+
