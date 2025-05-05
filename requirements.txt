@@ -2,10 +2,9 @@ pandas
 numpy
 datetime
 streamlit
-plotly.graph_objects
-plotly.subplots
+plotly
 base64
 io
-plotly.express
+
 
 
