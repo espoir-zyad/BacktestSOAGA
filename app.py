@@ -14,6 +14,36 @@ import plotly.express as px
 import xlsxwriter
 
 
+
+
+
+SECTORS = {
+    'SERVICES PUBLICS': ['SNTS', 'ORAC', 'SDCC', 'ONTBF', 'CIEC'],
+    'FINANCES': ['BOAB', 'BOABF', 'BOAC', 'BOAM', 'BOAN', 'BOAS', 'CBIBF', 'ECOC', 'ETIT', 
+                'NSBC', 'ORGT', 'SAFC', 'SGBC', 'SIBC', 'BICB'],
+    'INDUSTRIE': ['SIVC', 'SEMC', 'FTSC', 'NEIC', 'NTLC', 'CABC', 'STBC', 'SMBC', 'SLBC', 
+                 'UNLC', 'UNXC'],
+    'DISTRIBUTIONS': ['BNBC', 'CFAC', 'ABJC', 'TTLC', 'TTLS', 'PRSC', 'SHEC'],
+    'AGRICULTURE': ['PALC', 'SPHC', 'SICC', 'SOGC', 'SCRC'],
+    'AUTRES SECTEURS': ['STAC', 'LNBB'],
+    'TRANSPORT': ['SDSC', 'SVOC']
+}
+
+SECTOR_METRICS = {
+    'SERVICES PUBLICS': {'market_weight': 0.464, 'target': 0.50, 'deviation': 0.20},
+    'FINANCES': {'market_weight': 0.363, 'target': 0.30, 'deviation': 0.15},
+    'INDUSTRIE': {'market_weight': 0.078, 'target': 0.10, 'deviation': 0.05},
+    'DISTRIBUTIONS': {'market_weight': 0.045, 'target': 0.025, 'deviation': 0.05},
+    'AGRICULTURE': {'market_weight': 0.035, 'target': 0.025, 'deviation': 0.05},
+    'AUTRES SECTEURS': {'market_weight': 0.009, 'target': 0.025, 'deviation': 0.05},
+    'TRANSPORT': {'market_weight': 0.007, 'target': 0.025, 'deviation': 0.05}
+}
+
+
+
+
+
+
 # Configuration de la page
 st.set_page_config(
     page_title="SOAGA - Backtesting",
@@ -106,6 +136,22 @@ def load_logo():
     with open("img/logo_soaga.png", "rb") as f:
         data = base64.b64encode(f.read()).decode()
     return f"data:image/png;base64,{data}"
+
+
+def calculate_sector_weights(portfolio_state):
+    """Calcule les poids sectoriels du portefeuille"""
+    sector_weights = {}
+    
+    for sector, stocks in SECTORS.items():
+        sector_weight = sum(
+            portfolio_state.loc[stock, 'Weight'] 
+            for stock in stocks 
+            if stock in portfolio_state.index
+        )
+        sector_weights[sector] = sector_weight
+        
+    return sector_weights
+
 
 # Sidebar
 with st.sidebar:
@@ -322,6 +368,50 @@ else:
         
         st.markdown("</div>", unsafe_allow_html=True)
         
+        
+        
+        # Tableau des poids sectoriels
+        st.markdown("""
+            <div class='section-container'>
+            <h3 style='color: maroon; text-align: center;'>Analyse Sectorielle</h3>
+         """, unsafe_allow_html=True)
+
+        # Calcul des poids sectoriels
+        current_sector_weights = calculate_sector_weights(final_state)
+
+        # Création du tableau
+        sector_data = {
+           'Secteur': list(SECTORS.keys()),
+           'Poids Marché': [SECTOR_METRICS[s]['market_weight'] * 100 for s in SECTORS],
+           'Cible': [SECTOR_METRICS[s]['target'] * 100 for s in SECTORS],
+           'Limite Déviation': [SECTOR_METRICS[s]['deviation'] * 100 for s in SECTORS],
+           'Poids Portefeuille': [current_sector_weights[s] * 100 for s in SECTORS]
+      }
+        
+        sector_df = pd.DataFrame(sector_data)
+        sector_df = sector_df.round(2)
+
+        # Affichage avec formatage
+        st.dataframe(
+           sector_df.style
+               .format({
+                 'Poids Marché': '{:.2f}%',
+                 'Cible': '{:.2f}%',
+                 'Limite Déviation': '{:.2f}%',
+                 'Poids Portefeuille': '{:.2f}%'
+            })
+               .background_gradient(
+                  subset=['Poids Portefeuille'],
+                  text_color_threshold=0.5  # Seuil pour changer la couleur du texte
+
+            )
+        )
+
+        st.markdown("</div>", unsafe_allow_html=True)
+        
+        
+        
+        
         # Graphique de performance
         st.markdown("""
             <div class='section-container'>
@@ -435,7 +525,7 @@ else:
                 metrics['Volatilité Benchmark (%)'],
                 metrics['Tracking Error (%)'],
                 metrics['Beta'],
-                metrics['Corrélation']
+                metrics['Corrélation'],
             ), unsafe_allow_html=True)
         
         with risk_col2:
@@ -485,7 +575,7 @@ else:
                 x=cash_series.index,
                 y=cash_series.values,
                 name='Cash',
-                line=dict(color='maroon', width=3),
+                line=dict(color='maroon', width=4),
                 fill='tozeroy'
             )
         )

@@ -308,7 +308,7 @@ class Strategy2:
         """Calcul des métriques de performance"""
         nav_series = self.get_nav_series()
         benchmark = self.asset.get_benchmark_data(self.start_date, self.end_date)
-    
+        
         # Calcul des rendements
         portfolio_return = (nav_series[-1] / nav_series[0] - 1) 
         benchmark_return = (benchmark[-1] / benchmark[0] - 1) 
@@ -317,6 +317,8 @@ class Strategy2:
         daily_returns = nav_series.pct_change()
         benchmark_returns = benchmark.pct_change()
         
+        # Calcul de la VaR à 99% sur 1 jour
+        var_99 = np.percentile(daily_returns, 1)
     
         # Calcul des volatilités
         portfolio_vol = daily_returns.std() * np.sqrt(252)

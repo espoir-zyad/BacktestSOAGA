@@ -20,7 +20,13 @@ class Strategy4:
             'CASH': 0.05  # Nouveau: poids cible du cash
         }
         
-        
+    def _get_next_available_date(self, date):
+        """Trouve la prochaine date disponible dans les données"""
+        try:
+            available_dates = self.available_dates[self.available_dates >= date]
+            return available_dates[0] if not available_dates.empty else None
+        except Exception as e:
+            raise ValueError(f"Erreur lors de la recherche de la prochaine date: {str(e)}")
         
         # Dates disponibles
         self.available_dates = self.asset.data.index
