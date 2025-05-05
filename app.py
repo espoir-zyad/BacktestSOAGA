@@ -199,7 +199,7 @@ else:
         
         # Création de la stratégie selon le choix
         if strategy_type == "High return & Low Vol.":
-            strategy = Strategy4(
+            strategy = Strategy2(
                 initial_cash=initial_cash,
                 initial_nav=initial_nav,
                 start_date=start_date.strftime('%Y-%m-%d'),

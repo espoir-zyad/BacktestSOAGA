@@ -20,6 +20,8 @@ class Strategy4:
             'CASH': 0.05  # Nouveau: poids cible du cash
         }
         
+        
+        
         # Dates disponibles
         self.available_dates = self.asset.data.index
         self.start_date = self._get_next_available_date(self.start_date)
