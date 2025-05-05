@@ -119,7 +119,7 @@ with st.sidebar:
         # Choix de la stratégie
         strategy_type = st.selectbox(
             "Stratégie",
-            options=["Stratégie V2", "Stratégie V3"],
+            options=["High return & Low Vol.", "Stratégie interne T1 2025"],
             help="""
             Stratégie V2: Allocation fixe avec 16 meilleurs dividendes
             Stratégie V3: Allocation multi-groupes avec limites variables
@@ -196,7 +196,7 @@ else:
         asset = Asset2(uploaded_prices, uploaded_dividends)
         
         # Création de la stratégie selon le choix
-        if strategy_type == "Stratégie V2":
+        if strategy_type == "High return & Low Vol.":
             strategy = Strategy2(
                 initial_cash=initial_cash,
                 initial_nav=initial_nav,
@@ -418,12 +418,22 @@ else:
                             <td>Tracking Error</td>
                             <td style='text-align: right;'>{:.2f}%</td>
                         </tr>
+                        <tr>
+                            <td>Beta</td>
+                            <td style='text-align: right;'>{:.2f}</td>
+                        </tr>
+                        <tr>
+                            <td>Corrélation</td>
+                            <td style='text-align: right;'>{:.2f}</td>
+                        </tr>
                     </table>
                 </div>
             """.format(
                 metrics['Volatilité Portefeuille (%)'],
                 metrics['Volatilité Benchmark (%)'],
-                metrics['Tracking Error (%)']
+                metrics['Tracking Error (%)'],
+                metrics['Beta'],
+                metrics['Corrélation']
             ), unsafe_allow_html=True)
         
         with risk_col2:
@@ -457,6 +467,44 @@ else:
             ), unsafe_allow_html=True)
         
         st.markdown("</div>", unsafe_allow_html=True)
+        
+        
+        # Graphique d'évolution du cash
+        st.markdown("""
+            <div class='section-container'>
+                <h3 style='color: maroon; text-align: center;'>Évolution du Cash</h3>
+        """, unsafe_allow_html=True)
+        
+        cash_series = pd.Series(history['Cash'].values, index=history['Date'])
+        
+        fig_cash = go.Figure()
+        fig_cash.add_trace(
+            go.Scatter(
+                x=cash_series.index,
+                y=cash_series.values,
+                name='Cash',
+                line=dict(color='maroon', width=3),
+                fill='tozeroy'
+            )
+        )
+        
+        fig_cash.update_layout(
+            title={
+                'text': 'Évolution du Cash',
+                'y':0.95,
+                'x':0.5,
+                'xanchor': 'center',
+                'yanchor': 'top'
+            },
+            template='plotly_white',
+            height=400,
+            yaxis_title='Cash (XOF)',
+            showlegend=False
+        )
+        
+        st.plotly_chart(fig_cash, use_container_width=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+        
         
         # Export des données
         st.markdown("""

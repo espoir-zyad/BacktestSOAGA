@@ -153,7 +153,7 @@ class Strategy2:
             if self.cash >= 0.1 * total_value:
                 cash_injection = self.cash
                 portfolio_value += self.cash
-                self.cash = 0
+                self.cash = self.cash
                 needs_rebalancing = True
             
             # 5.2 Condition de déviation des poids (> ±2%)
@@ -316,10 +316,16 @@ class Strategy2:
         # Rendements quotidiens
         daily_returns = nav_series.pct_change()
         benchmark_returns = benchmark.pct_change()
+        
     
         # Calcul des volatilités
         portfolio_vol = daily_returns.std() * np.sqrt(252)
         benchmark_vol = benchmark_returns.std() * np.sqrt(252)
+    
+    
+        # Add correlation and beta calculations
+        correlation = daily_returns.corr(benchmark_returns)
+        beta = correlation * (portfolio_vol / benchmark_vol)
     
         # Tracking error et autres métriques de risque
         tracking_error = (daily_returns - benchmark_returns).std() * np.sqrt(252)
@@ -336,7 +342,9 @@ class Strategy2:
         return {
            'Performance Portefeuille (%)': portfolio_return*100,
            'Performance BRVM-C (%)': benchmark_return*100,
-           'Surperformance (%)': portfolio_return - benchmark_return,
+           'Surperformance (%)': (portfolio_return - benchmark_return)*100,
+           'Beta': beta,
+           'Corrélation': correlation,
            'Tracking Error (%)': tracking_error * 100,
            'Ratio de Sharpe': sharpe_ratio,
            'Ratio de Sortino': sortino_ratio,
