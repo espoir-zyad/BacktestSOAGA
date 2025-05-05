@@ -4,6 +4,7 @@ import numpy as np
 from Asset2 import Asset2
 from Strategy2 import Strategy2
 from Strategy3 import Strategy3
+from Strategy4 import Strategy4
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from datetime import datetime
@@ -198,7 +199,7 @@ else:
         
         # Création de la stratégie selon le choix
         if strategy_type == "High return & Low Vol.":
-            strategy = Strategy2(
+            strategy = Strategy4(
                 initial_cash=initial_cash,
                 initial_nav=initial_nav,
                 start_date=start_date.strftime('%Y-%m-%d'),
