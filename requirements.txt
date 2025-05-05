@@ -3,3 +3,4 @@ numpy
 DateTime
 streamlit
 plotly
+xlsxwriter

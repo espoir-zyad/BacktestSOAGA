@@ -9,8 +9,9 @@ from plotly.subplots import make_subplots
 from datetime import datetime
 import base64
 import io
-import xlsxwriter
 import plotly.express as px
+import xlsxwriter
+
 
 # Configuration de la page
 st.set_page_config(
