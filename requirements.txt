@@ -1,6 +1,5 @@
 pandas
 numpy
-collections
 datetime
 streamlit
 plotly.graph_objects
