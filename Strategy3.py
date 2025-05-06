@@ -311,46 +311,59 @@ class Strategy3:
         benchmark = self.asset.get_benchmark_data(self.start_date, self.end_date)
         
         # Calcul des rendements
-        portfolio_return = (nav_series[-1] / nav_series[0] - 1)
-        benchmark_return = (benchmark[-1] / benchmark[0] - 1)
-        
+        portfolio_return = (nav_series[-1] / nav_series[0] - 1) 
+        benchmark_return = (benchmark[-1] / benchmark[0] - 1) 
+    
         # Rendements quotidiens
         daily_returns = nav_series.pct_change()
         benchmark_returns = benchmark.pct_change()
+        risk_free_rate = 0.06  # Taux sans risque annuel (6%)
+        daily_rf = (1 + risk_free_rate) ** (1/252) - 1
         
+        # Calcul de la VaR à 99% sur 1 jour
+        var_99 = np.percentile(daily_returns, 1)
+    
         # Calcul des volatilités
         portfolio_vol = daily_returns.std() * np.sqrt(252)
         benchmark_vol = benchmark_returns.std() * np.sqrt(252)
-        
+    
+    
         # Add correlation and beta calculations
         correlation = daily_returns.corr(benchmark_returns)
         beta = correlation * (portfolio_vol / benchmark_vol)
-        
-        # Tracking error et autres métriques
+    
+        # Tracking error et autres métriques de risque
         tracking_error = (daily_returns - benchmark_returns).std() * np.sqrt(252)
-        sharpe_ratio = (portfolio_return - 0.06) / (portfolio_vol)
         
-        # Ratio de Sortino
+        excess_returns = daily_returns - daily_rf
+        annualized_excess_return = ((1 + excess_returns.mean()) ** 252 - 1)
+        sharpe_ratio = annualized_excess_return / portfolio_vol
+        
+        # # Calcul de l'alpha de Jensen
+        # daily_alpha = daily_returns.mean() - (daily_rf + beta * (benchmark_returns.mean() - daily_rf))
+        # alpha_jensen = ((1 + daily_alpha) ** 252 - 1) * 100
+    
+        # Calcul du Ratio de Sortino
         negative_returns = daily_returns[daily_returns < 0]
         downside_vol = negative_returns.std() * np.sqrt(252)
-        sortino_ratio = (portfolio_return - 0.06) / (downside_vol) if downside_vol != 0 else np.nan
-        
-        # Ratio d'Information
+        sortino_ratio = annualized_excess_return / (downside_vol) if downside_vol != 0 else np.nan
+    
+        # Calcul du Ratio d'Information
         information_ratio = (portfolio_return - benchmark_return) / (tracking_error)
-        
+    
         return {
-            'Performance Portefeuille (%)': portfolio_return*100,
-            'Performance BRVM-C (%)': benchmark_return*100,
-            'Surperformance (%)': (portfolio_return - benchmark_return)*100,
-            'Beta': beta,
-            'Corrélation': correlation,
-            'Tracking Error (%)': tracking_error * 100,
-            'Ratio de Sharpe': sharpe_ratio,
-            'Ratio de Sortino': sortino_ratio,
-            'Ratio d\'Information': information_ratio,
-            'Volatilité Portefeuille (%)': portfolio_vol * 100,
-            'Volatilité Benchmark (%)': benchmark_vol * 100,
-            'Total Dividendes': sum(self.portfolio['Dividends']),
-            'Total Injections': sum(self.portfolio['Cash_Injections']),
-            'Nombre Rebalancements': sum(1 for t in self.portfolio['Transactions'] if not t.empty)
+           'Performance Portefeuille (%)': portfolio_return*100,
+           'Performance BRVM-C (%)': benchmark_return*100,
+           'Surperformance (%)': (portfolio_return - benchmark_return)*100,
+           'Beta': beta,
+           'Corrélation': correlation,
+           'Tracking Error (%)': tracking_error * 100,
+           'Ratio de Sharpe': sharpe_ratio,
+           'Ratio de Sortino': sortino_ratio,
+           'Ratio d\'Information': information_ratio,
+           'Volatilité Portefeuille (%)': portfolio_vol * 100,
+           'Volatilité Benchmark (%)': benchmark_vol * 100,
+           'Total Dividendes': sum(self.portfolio['Dividends']),
+           'Total Injections': sum(self.portfolio['Cash_Injections']),
+           'Nombre Rebalancements': sum(1 for t in self.portfolio['Transactions'] if not t.empty)
         }

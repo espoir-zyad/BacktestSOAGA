@@ -75,7 +75,7 @@ st.markdown("""
         }
     </style>
     <div class="fixed-header">
-       <h3>Plateforme de Backtesting SOAGA - BRVM</h3>
+       <h2>Backtest Portfolio - SOAGA</h2>
     </div>
 """, unsafe_allow_html=True)
 
@@ -202,41 +202,128 @@ with st.sidebar:
             end_date = st.date_input(
                 "Date de fin",
                 min_value=datetime(2024, 1, 1),
-                max_value=datetime(2024, 12, 31),
-                value=datetime(2024, 12, 31)
+                max_value=datetime(2025, 4, 30),
+                value=datetime(2025, 4, 30)
             )
         
         submit_button = st.form_submit_button("Backtester")
 
 # Zone principale
+# Dans la section if not submit_button:
 if not submit_button:
+    # Description de l'outil
+    st.markdown("""
+        <style>
+            .custom-container {
+                background-color: white;
+                padding: 20px;
+                border-radius: 10px;
+                border-left: 5px solid maroon;
+                margin: 20px 0;
+                box-shadow: 0 2px 4px rgba(128, 0, 0, 0.1);
+            }
+            .custom-title {
+                color: maroon;
+                font-size: 24px;
+                font-weight: bold;
+                text-align: center;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid maroon;
+            }
+            .strategy-title {
+                color: maroon;
+                font-size: 20px;
+                font-weight: bold;
+                margin: 20px 0 15px 0;
+            }
+            .group-box {
+                background-color: #f5f5f5;
+                padding: 15px;
+                border-radius: 5px;
+                margin: 10px 0;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # Section Description de l'outil
     
-        st.markdown("""
-        ### Description de la stratégie à rendement et à faible volatilité
-        - Maintenir ORAC et SNTS à 18% chacun (36%)
-        - Maintenir SGBC et ECOC à 5% chacun (10%)
-        - Sélectionner les 16 meilleures actions à dividendes (54%)
-        - Rééquilibrage si :
-          - Cash ≥ 10% de l'actif total
-          - Déviation des poids > ±2%
-        
-   
-        
-        ### Description de la stratégie Interne T1 2023
-        1. **Titres à poids fixes** (49% du portefeuille)
-           - STNS et ORAC : 15% chacun
-           - SGBC et ECOC : 5% chacun
-           - SIBC, ONTBF et CBIBF : 3% chacun
-        
-        2. **Titres avec limite à 10%**
-           - Groupe 1 (13 titres à 2%) : BOAB, BOAC, BOABF, BOAN, CIEC, SDCC, PALC, SDSC, SOGC, CFAC, PRSC, TTLC, TTLS
-           - Groupe 2 (8 titres à 1.25%) : NTLC, STBC, NSBC, SMBC, NEIC, BICC, BOAS, SHEC
-           - Groupe 3 (14 titres à 1.07%) : ETIT, UNLC, FTSC, BOAM, SCRC, SPHC, BNBC, SICC, CABC, SIVC, SLBC, UNXC, SAFC, STAC
-        
-        3. **Conditions de rééquilibrage**
-           - Si un titre à poids fixe dévie de plus de 2%
-           - Si un titre libre dépasse 10%
-        """)
+    st.markdown("<h2 class='custom-title'>Portfolio Backtest Overview</h2>", unsafe_allow_html=True)
+    
+    st.write("Cet outil permet de simuler et d'évaluer différentes stratégies d'investissement "
+             "sur le marché boursier régional de la BRVM. Il offre une analyse approfondie basée sur les données historiques.")
+    
+    st.markdown("**Fonctionnalités principales:**")
+    st.markdown("""
+    - Simulation de stratégies d'investissement personnalisées
+    - Analyse détaillée des performances historiques
+    - Évaluation des risques et rendements ajustés
+    - Comparaison avec l'indice BRVM-C
+    - Comparaison sectorielle 
+    """)
+    
+    st.markdown("**Importance du Backtesting:**")
+    st.markdown("""
+    - Test des stratégies avant implémentation réelle
+    - Identification des forces et faiblesses
+    - Optimisation des paramètres d'investissement
+    - Compréhension du comportement dans différentes conditions de marché
+    - Aide à la décision pour la gestion d'actifs
+    """)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Section Stratégies
+
+    st.markdown("<h2 class='custom-title'>Stratégies implémentées</h2>", unsafe_allow_html=True)
+
+    # Stratégie 1
+    st.markdown("<h3 class='strategy-title'>1. High return & Low Vol.</h3>", unsafe_allow_html=True)
+    st.markdown("""
+    - Maintien **ORAC** et **SNTS** à **18%** chacun (36%) (Intervalles tactiques  ±2%)
+    - Maintien **SGBC** et **ECOC** à **5%** chacun (10%) (Intervalles tactiques  ±2%)
+    - Sélection des titres qui ont un rendement de dividendes **réguliers** et **croissant** au cours des **2 dernières années**
+    - Sélection des **Top 16** titres avec le meilleur rendement sur la dernière année
+    - Classement et pondération croissante des titres selon la **volatilité historique**
+    - **Investissement sur 20 lignes au total**
+    """)
+    
+    st.markdown("**Conditions de Rebalancement:**")
+    st.markdown("""
+    - Déviation des titres > ±2%
+    - Cash ≥ 10% de l'actif total
+    
+    """)
+
+    # Stratégie 2
+    st.markdown("<h3 class='strategy-title'>2. Stratégie Interne T1 2025</h3>", unsafe_allow_html=True)
+    
+    st.markdown("**Allocation de départ :**")
+    st.markdown("""
+    - **Groupe 1 - Valeurs vedettes ou Blue Ships :**
+        - **SNTS** et **ORAC** : 15% chacun
+        - **SGBC** et **ECOC** : 5% chacun
+        - **SIBC**, **ONTBF** et **CBIBF** : 3% chacun
+    """)
+    
+    st.markdown(""" 
+    - **Groupe 2 - Valeurs Rendements ou Défensives :**
+        - BOAB, BOAC, BOABF, BOAN, CIEC, SDCC, PALC, SDSC, SOGC, CFAC, PRSC, TTLC, TTLS : 2% chacun""")
+    
+    st.markdown("""
+    - **Groupe 3 - Valeurs de croissance :** 
+        - NTLC, STBC, NSBC, SMBC, NEIC, BICC, BOAS, SHEC : 1,25% chacun """)
+    
+    st.markdown("""
+    - **Groupe 4 - Sous-valorisés / Trading :** 
+        - ETIT, UNLC, FTSC, BOAM, SCRC, SPHC, BNBC, SICC, CABC, SIVC, SLBC, UNXC, SAFC, STAC : 1,07% chacun """)
+
+    st.markdown("**Conditions de Rebalancement:**")
+    st.markdown("""
+    - Si un titre du Groupe 1  dévie de ±2%
+    - Si un titre Du Groupe 2, 3 ou 4 dévie de +10%
+    """)
+    
+    st.markdown("</div>", unsafe_allow_html=True)
 
 else:
     try:
@@ -252,7 +339,7 @@ else:
                 end_date=end_date.strftime('%Y-%m-%d'),
                 asset=asset
             )
-            strategy_name = "V2"
+            strategy_name = "High-Return-&-Low-Vol"
         else:
             strategy = Strategy3(
                 initial_cash=initial_cash,
@@ -261,7 +348,44 @@ else:
                 end_date=end_date.strftime('%Y-%m-%d'),
                 asset=asset
             )
-            strategy_name = "V3"
+            strategy_name = "StratégieT125"
+        
+        
+        
+        # Get formatted period string
+        period = f"{start_date.strftime('%d/%m/%Y')} - {end_date.strftime('%d/%m/%Y')}"
+        
+        # Add styled title
+        st.markdown(
+            f"""
+            <style>
+                .backtest-header {{
+                    background-color: white;
+                    padding: 1rem;
+                    border-radius: 5px;
+                    margin-bottom: 2rem;
+                    text-align: center;
+                }}
+                .backtest-title {{
+                    color: maroon;
+                    font-size: 28px;
+                    font-weight: bold;
+                    margin-bottom: 0.5rem;
+                }}
+                .backtest-period {{
+                    color: #666;
+                    font-size: 18px;
+                }}
+            </style>
+            <div class="backtest-header">
+                <div class="backtest-title">Résultats du backtest</div>
+                <div class="backtest-period">{period}</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        
         
         history = strategy.get_portfolio_history()
         
@@ -373,7 +497,7 @@ else:
         # Tableau des poids sectoriels
         st.markdown("""
             <div class='section-container'>
-            <h3 style='color: maroon; text-align: center;'>Analyse Sectorielle</h3>
+            <h3 style='color: maroon; text-align: center;'>Comparaison Sectorielle</h3>
          """, unsafe_allow_html=True)
 
         # Calcul des poids sectoriels
@@ -400,22 +524,72 @@ else:
                  'Limite Déviation': '{:.2f}%',
                  'Poids Portefeuille': '{:.2f}%'
             })
-               .background_gradient(
-                  subset=['Poids Portefeuille'],
-                  text_color_threshold=0.5  # Seuil pour changer la couleur du texte
-
-            )
+               
         )
 
+        
+        
+
+        # Préparation des données pour le graphique
+        sector_comparison = pd.DataFrame({
+            'Secteur': sector_df['Secteur'],
+            'Poids Portefeuille': sector_df['Poids Portefeuille'],
+            'Poids Marché': sector_df['Poids Marché']
+        })
+
+        # Création du graphique avec plotly
+        fig_sectors = go.Figure()
+        
+        # Ajout des barres pour le poids en portefeuille
+        fig_sectors.add_trace(go.Bar(
+           y=sector_comparison['Secteur'],
+           x=sector_comparison['Poids Portefeuille'],
+           name='Poids Portefeuille',
+           orientation='h',
+           marker_color='maroon'
+        ))
+
+        # Ajout des barres pour le poids marché
+        fig_sectors.add_trace(go.Bar(
+            y=sector_comparison['Secteur'],
+            x=sector_comparison['Poids Marché'],
+            name='Poids Marché',
+            orientation='h',
+            marker_color='black'
+        ))
+        
+        # Mise à jour du layout
+        fig_sectors.update_layout(
+            barmode='group',
+            height=400,
+            template='plotly_white',
+            title={
+                'text': 'Portefeuille vs Benchmark',
+                'y': 0.95,
+                'x': 0.5,
+                'xanchor': 'center',
+                'yanchor': 'top'
+            },
+            xaxis_title='Poids (%)',
+            yaxis_title='Secteur',
+            legend=dict(
+               orientation='h',
+               yanchor='bottom',
+               y=1.02,
+               xanchor='right',
+               x=1
+            ),
+            margin=dict(l=20, r=20, t=60, b=20)
+        )
+
+        # Affichage du graphique
+        st.plotly_chart(fig_sectors, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
-        
-        
-        
         
         # Graphique de performance
         st.markdown("""
             <div class='section-container'>
-                <h3 style='color: maroon; text-align: center;'>Performance Comparée</h3>
+                <h3 style='color: maroon; text-align: center;'>Visuel de la Performance</h3>
         """, unsafe_allow_html=True)
         
         nav_series = strategy.get_nav_series()
@@ -468,10 +642,10 @@ else:
         
         st.markdown("""
             <div class='section-container'>
-                <h3 style='color: maroon; text-align: center;'>Métriques de Performance</h3>
+                <h3 style='color: maroon; text-align: center;'>Mesure de la Performance et du Risque</h3>
         """, unsafe_allow_html=True)
         
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.metric(
                 "Performance Portefeuille",
@@ -489,6 +663,12 @@ else:
                 "Surperformance",
                 f"{metrics['Surperformance (%)']:.2f}%",
                 delta=f"{metrics['Surperformance (%)']:.2f}%"
+            )
+        with col4:
+            st.metric(
+                "Nombre de Rebalancements",
+                f"{metrics['Nombre Rebalancements']:}",
+                delta=f"{metrics['Nombre Rebalancements']:}"
             )
         
         # Indicateurs de risque
@@ -531,7 +711,7 @@ else:
         with risk_col2:
             st.markdown("""
                 <div class='metric-container'>
-                    <h4 style='color: maroon;'>Autres Métriques</h4>
+                    <h4 style='color: maroon;'>Performance ajustée au Risque</h4>
                     <table style='width: 100%;'>
                         <tr>
                             <td>Ratio de Sharpe</td>
@@ -545,57 +725,53 @@ else:
                             <td>Ratio d'Information</td>
                             <td style='text-align: right;'>{:.2f}</td>
                         </tr>
-                        <tr>
-                            <td>Nombre de Rebalancements</td>
-                            <td style='text-align: right;'>{}</td>
-                        </tr>
                     </table>
                 </div>
             """.format(
                 metrics['Ratio de Sharpe'],
                 metrics['Ratio de Sortino'],
                 metrics['Ratio d\'Information'],
-                metrics['Nombre Rebalancements']
+               
             ), unsafe_allow_html=True)
         
         st.markdown("</div>", unsafe_allow_html=True)
         
         
-        # Graphique d'évolution du cash
-        st.markdown("""
-            <div class='section-container'>
-                <h3 style='color: maroon; text-align: center;'>Évolution du Cash</h3>
-        """, unsafe_allow_html=True)
+        # # Graphique d'évolution du cash
+        # st.markdown("""
+        #     <div class='section-container'>
+        #         <h3 style='color: maroon; text-align: center;'>Évolution du Cash</h3>
+        # """, unsafe_allow_html=True)
         
-        cash_series = pd.Series(history['Cash'].values, index=history['Date'])
+        # cash_series = pd.Series(history['Cash'].values, index=history['Date'])
         
-        fig_cash = go.Figure()
-        fig_cash.add_trace(
-            go.Scatter(
-                x=cash_series.index,
-                y=cash_series.values,
-                name='Cash',
-                line=dict(color='maroon', width=4),
-                fill='tozeroy'
-            )
-        )
+        # fig_cash = go.Figure()
+        # fig_cash.add_trace(
+        #     go.Scatter(
+        #         x=cash_series.index,
+        #         y=cash_series.values,
+        #         name='Cash',
+        #         line=dict(color='maroon', width=4),
+        #         fill='tozeroy'
+        #     )
+        # )
         
-        fig_cash.update_layout(
-            title={
-                'text': 'Évolution du Cash',
-                'y':0.95,
-                'x':0.5,
-                'xanchor': 'center',
-                'yanchor': 'top'
-            },
-            template='plotly_white',
-            height=400,
-            yaxis_title='Cash (XOF)',
-            showlegend=False
-        )
+        # fig_cash.update_layout(
+        #     title={
+        #         'text': 'Évolution du Cash',
+        #         'y':0.95,
+        #         'x':0.5,
+        #         'xanchor': 'center',
+        #         'yanchor': 'top'
+        #     },
+        #     template='plotly_white',
+        #     height=400,
+        #     yaxis_title='Cash (XOF)',
+        #     showlegend=False
+        # )
         
-        st.plotly_chart(fig_cash, use_container_width=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+        # st.plotly_chart(fig_cash, use_container_width=True)
+        # st.markdown("</div>", unsafe_allow_html=True)
         
         
         # Export des données
@@ -632,12 +808,22 @@ else:
                 transactions_df.to_excel(writer, sheet_name='Transactions', index=False)
             
             # Export des métriques
-            pd.DataFrame([metrics]).to_excel(writer, sheet_name='Métriques', index=False)
+            metrics_df = pd.DataFrame({
+                   'Métrique': list(metrics.keys()),
+                   'Valeur': list(metrics.values())
+            })
+
+            # Export metrics in column format
+            metrics_df.to_excel(
+                 writer, 
+                 sheet_name='Métriques',
+                 index=False
+            )
         
         st.download_button(
             label="📥 Télécharger les données",
             data=output.getvalue(),
-            file_name=f"backtest_{strategy_name.lower()}_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.xlsx",
+            file_name=f"resultat_{strategy_name.lower()}_{start_date.strftime('%Y-%m-%d')}_{end_date.strftime('%Y-%m-%d')}.xlsx",
             mime="application/vnd.ms-excel"
         )
         

@@ -316,6 +316,8 @@ class Strategy2:
         # Rendements quotidiens
         daily_returns = nav_series.pct_change()
         benchmark_returns = benchmark.pct_change()
+        risk_free_rate = 0.06  # Taux sans risque annuel (6%)
+        daily_rf = (1 + risk_free_rate) ** (1/252) - 1
         
         # Calcul de la VaR à 99% sur 1 jour
         var_99 = np.percentile(daily_returns, 1)
@@ -331,12 +333,19 @@ class Strategy2:
     
         # Tracking error et autres métriques de risque
         tracking_error = (daily_returns - benchmark_returns).std() * np.sqrt(252)
-        sharpe_ratio = (portfolio_return - 0.06) / (portfolio_vol)
+        
+        excess_returns = daily_returns - daily_rf
+        annualized_excess_return = ((1 + excess_returns.mean()) ** 252 - 1)
+        sharpe_ratio = annualized_excess_return / portfolio_vol
+        
+        # # Calcul de l'alpha de Jensen
+        # daily_alpha = daily_returns - (risk_free_rate + beta * (benchmark_returns - risk_free_rate))
+        # alpha_jensen = daily_alpha*100
     
         # Calcul du Ratio de Sortino
         negative_returns = daily_returns[daily_returns < 0]
         downside_vol = negative_returns.std() * np.sqrt(252)
-        sortino_ratio = (portfolio_return - 0.06) / (downside_vol) if downside_vol != 0 else np.nan
+        sortino_ratio = annualized_excess_return / (downside_vol) if downside_vol != 0 else np.nan
     
         # Calcul du Ratio d'Information
         information_ratio = (portfolio_return - benchmark_return) / (tracking_error)
